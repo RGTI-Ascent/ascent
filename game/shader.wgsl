@@ -24,6 +24,7 @@ struct CameraUniforms {
 struct ModelUniforms {
     modelMatrix: mat4x4f,
     normalMatrix: mat3x3f,
+    uvScale: vec2f, // NEW: scale for UV tiling
 }
 
 @group(0) @binding(0) var<uniform> camera: CameraUniforms;
@@ -35,7 +36,7 @@ struct ModelUniforms {
 fn vertex(input: VertexInput) -> VertexOutput {
     var output: VertexOutput;
     output.position = camera.projectionMatrix * camera.viewMatrix * model.modelMatrix * vec4(input.position, 1);
-    output.texcoords = input.texcoords;
+    output.texcoords = input.texcoords*material.uvScale;
     return output;
 }
 

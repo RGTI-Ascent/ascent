@@ -40,6 +40,9 @@ export class UnlitRenderer extends BaseRenderer {
     async initialize() {
         await super.initialize();
 
+        const wgslUrl = new URL('UnlitRenderer.wgsl', import.meta.url);
+        console.log('Fetching WGSL from:', wgslUrl.href);
+
         const code = await fetch(new URL('UnlitRenderer.wgsl', import.meta.url))
             .then(response => response.text());
         const module = this.device.createShaderModule({ code });
@@ -152,7 +155,7 @@ export class UnlitRenderer extends BaseRenderer {
         const baseTexture = this.prepareTexture(material.baseTexture);
 
         const materialUniformBuffer = this.device.createBuffer({
-            size: 16,
+            size: 32,
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
         });
 
@@ -232,7 +235,12 @@ export class UnlitRenderer extends BaseRenderer {
 
     renderPrimitive(primitive) {
         const { materialUniformBuffer, materialBindGroup } = this.prepareMaterial(primitive.material);
-        this.device.queue.writeBuffer(materialUniformBuffer, 0, new Float32Array(primitive.material.baseFactor));
+        const materialData = new Float32Array([
+            ...primitive.material.baseFactor,   // vec4f
+            ...primitive.material.uvScale,   // vec2f
+            0, 0,
+        ]);
+        this.device.queue.writeBuffer(materialUniformBuffer, 0, materialData);
         this.renderPass.setBindGroup(2, materialBindGroup);
 
         const { vertexBuffer, indexBuffer } = this.prepareMesh(primitive.mesh, vertexBufferLayout);

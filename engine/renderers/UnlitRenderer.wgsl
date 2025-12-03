@@ -28,6 +28,8 @@ struct ModelUniforms {
 
 struct MaterialUniforms {
     baseFactor: vec4f,
+    uvScale: vec2f, // NEW: scale for UV tiling
+    padding: vec2f,
 }
 
 @group(0) @binding(0) var<uniform> camera: CameraUniforms;
@@ -52,7 +54,19 @@ fn vertex(input: VertexInput) -> VertexOutput {
 fn fragment(input: FragmentInput) -> FragmentOutput {
     var output: FragmentOutput;
 
-    output.color = textureSample(baseTexture, baseSampler, input.texcoords) * material.baseFactor;
+    let baseColor = textureSample(baseTexture, baseSampler, input.texcoords * material.uvScale) * material.baseFactor;
+
+    // Compute brightness
+    let brightness = max(max(baseColor.r, baseColor.g), baseColor.b);
+
+    // Soft bloom factor
+    let bloomFactor = smoothstep(0.3, 1.3, brightness); // adjust 0.5–1.0 as needed
+
+    // Bloom contribution
+    let bloomColor = baseColor.rgb * bloomFactor * 0.5; // tweak 0.5 intensity
+
+    // Combine with original
+    output.color = vec4(baseColor.rgb + bloomColor, baseColor.a);
 
     return output;
 }

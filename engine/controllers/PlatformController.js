@@ -7,7 +7,7 @@ export class PlatformController {
         towerRadius = 5,
         angleTolerance = 0.05,
         verticalTolerance = 0.1,
-        groundHeight = 0.5,
+        groundHeight = 0.2,
     } = {}) {
         this.towerRadius = towerRadius;
         this.angleTolerance = angleTolerance;
@@ -16,8 +16,8 @@ export class PlatformController {
         this.platforms = [];
     }
 
-    // doda platformo od angleStart do angleEnd z visino, debelino itd
-    add({ angleStart, angleEnd, height, thickness = 0.4, radius = null }) {
+    // doda platformo od angleStart do angleEnd z visino,0.4debelino itd
+    add({ angleStart, angleEnd, height, thickness = 1, radius = null }) {
         this.platforms.push({
             angleStart,
             angleEnd,
@@ -92,7 +92,7 @@ export class PlatformController {
                     player.verticalPosition <= bottom + this.verticalTolerance) {
 
                     player.verticalVelocity = 0;
-                    player.verticalPosition = bottom - 0.01;
+                    player.verticalPosition = bottom - 0.02;
                 }
             }
             

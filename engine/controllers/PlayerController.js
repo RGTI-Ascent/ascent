@@ -40,12 +40,12 @@ export class PlayerController {
         cameraEntity = null,
         platformCtrl = null,
         towerRadius = 5,
-        speed = 2,
+        speed = 1.1,
         jumpVelocity = 11,
-        gravity = 30,
-        baseHeight = 0.5,
-        cameraOffsetLocal = [0, 3, 10],
-        cameraSmoothing = 8,
+        gravity = 25,
+        baseHeight = 0,
+        cameraOffsetLocal = [0, 3, 8],
+        cameraSmoothing = 3,
         coyoteTime = 0.12,
         jumpBuffer = 0.12,
     } = {}) {
@@ -84,7 +84,7 @@ export class PlayerController {
         const doc = this.domElement.ownerDocument;
         doc.addEventListener('keydown', e => {
             this.keys[e.code] = true;
-            if (e.code === 'Space') this.jumpBufferTimer = this.jumpBufferMax;
+            if (e.code === 'KeyW') this.jumpBufferTimer = this.jumpBufferMax;
         });
         doc.addEventListener('keyup', e => {
             this.keys[e.code] = false;
@@ -93,6 +93,8 @@ export class PlayerController {
 
     update(t, dt) {
         if (dt <= 0) return;
+
+        this.cameraOffsetLocal[1] = 2+this.verticalPosition;
 
         // input
         if (this.keys['KeyA']) this.angle += this.speed * dt;
@@ -121,7 +123,7 @@ export class PlayerController {
         }
 
         // early jump release
-        if (!this.keys['Space'] && this.verticalVelocity > 0) {
+        if (!this.keys['KeyW'] && this.verticalVelocity > 0) {
             this.verticalVelocity *= 0.55;
         }
 
@@ -159,9 +161,12 @@ export class PlayerController {
         quat.fromMat3(rotation, rotMat);
         transform.rotation = rotation;
 
-        // jump stretch
-        if (this.keys['Space']) transform.scale = [0.8, 1.2, 0.8];
+        if (this.verticalVelocity > 0) transform.scale = [1-this.verticalVelocity*0.03, 1 + this.verticalVelocity*0.03, 1-this.verticalVelocity*0.03];
         else transform.scale = [1, 1, 1];
+
+        /*// jump stretch
+        if (this.keys['KeyW']) transform.scale = [0.8, 1.2, 0.8];
+        else transform.scale = [1, 1, 1];*/
 
         // facing direction
         if (this.keys['KeyA']) this.facingRight = false;
