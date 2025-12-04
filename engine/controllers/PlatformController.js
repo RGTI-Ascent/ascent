@@ -17,23 +17,15 @@ export class PlatformController {
     }
 
     // doda platformo od angleStart do angleEnd z visino,0.4debelino itd
-    add({ angleStart, angleEnd, height, thickness = 1, radius = null }) {
+    add({ angleStart, angleEnd, height, thickness = 1, radius = null, deadly }) {
         this.platforms.push({
             angleStart,
             angleEnd,
             height,
             thickness,
-            radius: radius ?? this.towerRadius
+            radius: radius ?? this.towerRadius,
+            deadly: deadly,
         });
-    }
-
-    // nadomesti vse platforme
-    setPlatforms(arr) {
-        this.platforms = arr.map(p => ({
-            ...p,
-            thickness: p.thickness ?? 0.4,
-            radius: p.radius ?? this.towerRadius,
-        }));
     }
 
     // Angle wrap helper
@@ -78,7 +70,7 @@ export class PlatformController {
             if (insideAngle && player.verticalVelocity <= 0) {
                 if (player.verticalPosition <= top + this.verticalTolerance &&
                     player.verticalPosition >= top - 1.0) {
-
+                    if(p.deadly) player.alive = false;
                     if (top > landedY) {
                         landed = p;
                         landedY = top;
@@ -90,7 +82,7 @@ export class PlatformController {
             if (insideAngle && player.verticalVelocity > 0) {
                 if (player.verticalPosition >= bottom - this.verticalTolerance &&
                     player.verticalPosition <= bottom + this.verticalTolerance) {
-
+                    if(p.deadly) player.alive = false;
                     player.verticalVelocity = 0;
                     player.verticalPosition = bottom - 0.02;
                 }

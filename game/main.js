@@ -25,16 +25,18 @@ const resources = await loadResources({
     'cubeMesh': new URL('../../../models/cube/cube.json', import.meta.url),
     'image': new URL('../../../models/floor/rock.png', import.meta.url),
     'stonebrick': new URL('../../../models/cube/stonebrick.png', import.meta.url),
-    'playerSprite': new URL('../../mario.png', import.meta.url),
+    'playerSprite': new URL('../../totem.png', import.meta.url),
     'towerBase': new URL('../../models/Base/Base.obj', import.meta.url),
     'platform3': new URL('../../models/Platforms/platform3mod.obj', import.meta.url),
-    'water': new URL('../../../lava.jpg', import.meta.url),
+    'water': new URL('../../../lava2.png', import.meta.url),
     'sky': new URL('../../../sky.png', import.meta.url),
+    'spikes': new URL('../../../models/Platforms/spikes.obj', import.meta.url),
+    'blood': new URL('../../../blood.jpg', import.meta.url),
 });
 
 const scene = []
 
-const canvas = document.querySelector('canvas');
+const canvas = document.getElementById("game");
 const renderer = new UnlitRenderer(canvas);
 await renderer.initialize();
 
@@ -49,7 +51,7 @@ scene.push(camera);
 const floor = new Entity();
 floor.addComponent(new Transform({
     scale: [800, 1, 800],
-    translation: [0, -4, 0],
+    translation: [0, -0.7, 0],
 }));
 floor.addComponent(new Model({
     primitives: [
@@ -59,13 +61,13 @@ floor.addComponent(new Model({
                 baseTexture: new Texture({
                     image: resources.water,
                     sampler: new Sampler({
-                        minFilter: 'linear',
-                        magFilter: 'linear',
+                        minFilter: 'nearest',
+                        magFilter: 'nearest',
                         addressModeU: 'repeat',
                         addressModeV: 'repeat',
                     }),
                 }),
-                uvScale: [20, 20],
+                uvScale: [100, 100],
             }),
         }),
     ],
@@ -73,8 +75,8 @@ floor.addComponent(new Model({
 
 const tower = new Entity();
 tower.addComponent(new Transform({
-    translation: [0, -3.5, 0],
-    scale: [0.0022, 0.0022, 0.0022],
+    translation: [0, -6.8, 0],
+    scale: [0.0024, 0.0044, 0.0024], // origvalues: 0.0022, 0.0022, 0.0022
 }));
 tower.addComponent(new Model({
     primitives: [
@@ -91,7 +93,7 @@ tower.addComponent(new Model({
                     }),
                 }),
                 baseFactor: [1, 1, 1, 1],
-                uvScale: [70, 70],
+                uvScale: [90, 140], // origvalues: 70, 70
             }),
         }),
     ],
@@ -135,8 +137,12 @@ playerSquare.addComponent(new Model({
 
 
 const platformCtrl = new PlatformController({ baseHeight: 0.5 });
-const playerController = new PlayerController(playerSquare, canvas, 
-    { cameraEntity: camera, platformCtrl: platformCtrl });
+const playerController = new PlayerController(playerSquare, canvas, {   
+        cameraEntity: camera, 
+        platformCtrl: platformCtrl, 
+        hudElement: document.getElementById("hud"),
+        deathTextElement: document.getElementById("hud2"),
+    }); if (hud2) hud2.style.display = "none";
 playerSquare.addComponent(playerController);
 
 // platforme ---------------------------------
@@ -145,52 +151,96 @@ function quatFromY(angle) {
     return [0, Math.sin(angle / 2), 0, Math.cos(angle / 2)];
 }
 
-function addPlatform(angle, height) { //doda platformo na dolocenem kotu in visini
+function addPlatform(angle, height, deadly) { //doda platformo na dolocenem kotu in visini
     const platform = new Entity();
-    platform.addComponent(new Transform({
-        rotation: quatFromY(angle),
-        translation: [0, -5.45+height, 0],
-        scale: [0.22, 0.22, 0.22],
-    }));
-    platform.addComponent(new Model({
-        primitives: [
-            new Primitive({
-                mesh: resources.platform3,
-                material: new Material({
-                    baseTexture: new Texture({
-                        image: resources.stonebrick,
-                        sampler: new Sampler({
-                            minFilter: 'linear',
-                            magFilter: 'linear',
-                            addressModeU: 'repeat',
-                            addressModeV: 'repeat',
+    if(!deadly) {
+        platform.addComponent(new Transform({
+            rotation: quatFromY(angle),
+            translation: [0, -5.45+height, 0],
+            scale: [0.22, 0.22, 0.22],
+        }));
+        platform.addComponent(new Model({
+            primitives: [
+                new Primitive({
+                    mesh: resources.platform3,
+                    material: new Material({
+                        baseTexture: new Texture({
+                            image: resources.stonebrick,
+                            sampler: new Sampler({
+                                minFilter: 'linear',
+                                magFilter: 'linear',
+                                addressModeU: 'repeat',
+                                addressModeV: 'repeat',
+                            }),
                         }),
+                        uvScale: [0.05, 0.05]
                     }),
-                    uvScale: [0.05, 0.05]
                 }),
-            }),
-        ],
-    }));
+            ],
+        }));
+
+        const rightQuarterStart = -Math.PI/7 - angle;           // 0 radians
+        const rightQuarterEnd =  Math.PI/7 - angle;  // 90 degrees
+
+        const p = {
+            angleStart: rightQuarterStart,
+            angleEnd: rightQuarterEnd,
+            height: height,
+            deadly: deadly,
+        };
+        platformCtrl.add(p);
+    } else if (deadly) {
+        platform.addComponent(new Transform({
+            rotation: quatFromY(angle),
+            translation: [0, -5.45+height, 0],
+            scale: [0.22, 0.22, 0.22],
+        }));
+        platform.addComponent(new Model({
+            primitives: [
+                new Primitive({
+                    mesh: resources.spikes,
+                    material: new Material({
+                        baseTexture: new Texture({
+                            image: resources.blood,
+                            sampler: new Sampler({
+                                minFilter: 'nearest',
+                                magFilter: 'nearest',
+                                addressModeU: 'repeat',
+                                addressModeV: 'repeat',
+                            }),
+                        }),
+                        uvScale: [100, 80],
+                    }),
+                }),
+            ],
+        }));
+
+        const rightQuarterStart = -Math.PI/18 - angle;           
+        const rightQuarterEnd =  Math.PI/18 - angle;  
+
+        const p = {
+            angleStart: rightQuarterStart,
+            angleEnd: rightQuarterEnd,
+            height: height,
+            deadly: deadly,
+        };
+        platformCtrl.add(p);
+    }
+
     scene.push(platform);
-
-    const rightQuarterStart = -Math.PI/7 - angle;           // 0 radians
-    const rightQuarterEnd =  Math.PI/7 - angle;  // 90 degrees
-
-    const p = {
-        angleStart: rightQuarterStart,
-        angleEnd: rightQuarterEnd,
-        height: height
-    };
-    platformCtrl.add(p);
 }
 
 let platforms = [
     [Math.PI/4, 2],
     [Math.PI/2, 4],
+    [Math.PI/2+0.05, 4, true],
+    [Math.PI, 4],
     [Math.PI, 4],
     [3*Math.PI/2, 6],
     [Math.PI, 8],
     [Math.PI, 10],
+    [Math.PI-0.05, 10, true],
+    [Math.PI+0.05, 10, true],
     [Math.PI/2, 12],
     [0, 14],
     [3*Math.PI/2, 16],
@@ -198,12 +248,16 @@ let platforms = [
     [Math.PI/4, 20],
 ];
 
-for (const [angle, height] of platforms) addPlatform(angle, height);
+for (const [angle, height, death] of platforms) addPlatform(angle, height, death ?? false);
 // ------------------------------------------
 
 scene.push(playerSquare);
 
+const hud = document.getElementById("hud");
+
 function update(t, dt) {
+    hud.textContent = `Height: ${Math.floor(playerSquare.getComponentOfType(PlayerController).cameraOffsetLocal[1]-2)}`;
+
     for (const entity of scene) {
         for (const component of entity.components) {
             component.update?.(t, dt);
@@ -213,7 +267,7 @@ function update(t, dt) {
     //lava animation
     //floor.getComponentOfType(Transform).translation[1] += 0.3*dt;
     const floorMat = floor.getComponentOfType(Model).primitives[0].material;
-    floorMat.uvScale[1] += dt * 0.01; // move upward at 0.1 units per second
+    floorMat.uvScale[1] += dt * 0.01; // move upward at 0.1 units per second    
 }
 
 function render() {

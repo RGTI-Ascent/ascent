@@ -48,6 +48,8 @@ export class PlayerController {
         cameraSmoothing = 3,
         coyoteTime = 0.12,
         jumpBuffer = 0.12,
+        hudElement = null,       // HUD div
+        deathTextElement = null, // centered HUD div
     } = {}) {
 
         this.entity = entity;
@@ -61,6 +63,8 @@ export class PlayerController {
         this.baseHeight = baseHeight;
         this.cameraOffsetLocal = cameraOffsetLocal;
         this.cameraSmoothing = cameraSmoothing;
+
+        this.alive = true; // death boolean
 
         this.coyoteTimeMax = coyoteTime;
         this.jumpBufferMax = jumpBuffer;
@@ -80,11 +84,21 @@ export class PlayerController {
         this.platformCtrl = platformCtrl;
     }
 
+    showDeathText() {
+        const hud2 = document.getElementById("hud2");
+        const overlay = document.getElementById("death-overlay");
+        if (!hud2) return;
+
+        // Make it visible
+        hud2.style.display = "block";
+        overlay.style.display = "block";
+    }
+
     initHandlers() {
         const doc = this.domElement.ownerDocument;
         doc.addEventListener('keydown', e => {
             this.keys[e.code] = true;
-            if (e.code === 'KeyW') this.jumpBufferTimer = this.jumpBufferMax;
+            if (e.code === 'KeyW' && this.alive) this.jumpBufferTimer = this.jumpBufferMax;
         });
         doc.addEventListener('keyup', e => {
             this.keys[e.code] = false;
@@ -92,13 +106,21 @@ export class PlayerController {
     }
 
     update(t, dt) {
+        if(!this.alive) {
+            this.showDeathText();
+            if (this.keys['Space']) {
+                window.location.reload();
+            }
+            this.cameraSmoothing = 0.7;
+            this.cameraOffsetLocal[2] = 15; 
+        }
         if (dt <= 0) return;
 
         this.cameraOffsetLocal[1] = 2+this.verticalPosition;
 
         // input
-        if (this.keys['KeyA']) this.angle += this.speed * dt;
-        if (this.keys['KeyD']) this.angle -= this.speed * dt;
+        if (this.keys['KeyA'] && this.alive) this.angle += this.speed * dt;
+        if (this.keys['KeyD'] && this.alive) this.angle -= this.speed * dt;
         const twopi = Math.PI * 2;
         this.angle = ((this.angle % twopi) + twopi) % twopi;
 
@@ -169,8 +191,8 @@ export class PlayerController {
         else transform.scale = [1, 1, 1];*/
 
         // facing direction
-        if (this.keys['KeyA']) this.facingRight = false;
-        if (this.keys['KeyD']) this.facingRight = true;
+        if (this.keys['KeyA'] && this.alive) this.facingRight = false;
+        if (this.keys['KeyD'] && this.alive) this.facingRight = true;
 
         if (!this.facingRight) transform.scale[0] = Math.abs(transform.scale[0]);
         else transform.scale[0] = -Math.abs(transform.scale[0]);
