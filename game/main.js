@@ -256,7 +256,8 @@ scene.push(playerSquare);
 const hud = document.getElementById("hud");
 
 function update(t, dt) {
-    hud.textContent = `Height: ${Math.floor(playerSquare.getComponentOfType(PlayerController).cameraOffsetLocal[1]-2)}`;
+    //hud.textContent = `Height: ${Math.floor(playerSquare.getComponentOfType(PlayerController).cameraOffsetLocal[1]-2)}`;
+    hud.textContent = `Time: ${Math.floor(t)}`;
 
     for (const entity of scene) {
         for (const component of entity.components) {
