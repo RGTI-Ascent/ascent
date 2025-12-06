@@ -3,6 +3,7 @@ import { UpdateSystem } from 'engine/systems/UpdateSystem.js';
 import { UnlitRenderer } from 'engine/renderers/UnlitRenderer.js';
 import { PlayerController } from 'engine/controllers/PlayerController.js';
 import { PlatformController } from 'engine/controllers/PlatformController.js';
+import { EnemyController } from '../engine/controllers/EnemyController.js';
 
 import {
     Camera,
@@ -32,6 +33,7 @@ const resources = await loadResources({
     'sky': new URL('../../../sky.png', import.meta.url),
     'spikes': new URL('../../../models/Platforms/spikes.obj', import.meta.url),
     'blood': new URL('../../../blood.jpg', import.meta.url),
+    'zombie': new URL('../../../models/cube/big-zombie-face.png', import.meta.url),
 });
 
 const scene = []
@@ -189,6 +191,7 @@ function addPlatform(angle, height, deadly) { //doda platformo na dolocenem kotu
             deadly: deadly,
         };
         platformCtrl.add(p);
+        addEnemyToPlatform(platform);
     } else if (deadly) {
         platform.addComponent(new Transform({
             rotation: quatFromY(angle),
@@ -249,6 +252,43 @@ let platforms = [
 ];
 
 for (const [angle, height, death] of platforms) addPlatform(angle, height, death ?? false);
+
+
+function addEnemyToPlatform(platformEntity) {
+    const enemy = new Entity();
+
+    enemy.addComponent(new Transform({
+        translation: [-0, 25, 22],
+        scale: [1, 1, 1],
+    }));
+
+    enemy.addComponent(new Model({
+        primitives: [
+            new Primitive({
+                mesh: resources.cubeMesh,
+                material: new Material({
+                    baseTexture: new Texture({
+                        image: resources.zombie,
+                        sampler: new Sampler({
+                            minFilter: 'nearest',
+                            magFilter: 'nearest',
+                            addressModeU: 'clamp-to-edge',
+                            addressModeV: 'clamp-to-edge',
+                        }),
+                    }),
+                    baseFactor: [1, 1, 1, 1],
+                }),
+            }),
+        ],
+    }));
+
+    enemy.addComponent(new EnemyController(enemy, { speed: 1.2 }));
+
+    enemy.addComponent(new Parent(platformEntity));
+
+    scene.push(enemy);
+}
+
 // ------------------------------------------
 
 scene.push(playerSquare);

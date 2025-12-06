@@ -191,8 +191,8 @@ export class PlayerController {
         else transform.scale = [1, 1, 1];*/
 
         // facing direction
-        if (this.keys['KeyA'] && this.alive) this.facingRight = false;
-        if (this.keys['KeyD'] && this.alive) this.facingRight = true;
+        if (this.keys['KeyA'] && this.alive) this.facingRight = true;
+        if (this.keys['KeyD'] && this.alive) this.facingRight = false;
 
         if (!this.facingRight) transform.scale[0] = Math.abs(transform.scale[0]);
         else transform.scale[0] = -Math.abs(transform.scale[0]);
