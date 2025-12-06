@@ -2,6 +2,8 @@
 // Simple cylindrical platform collision for tower-style platformers.
 // Supports: top landings, bottom head bumps, and side collisions.
 
+
+
 export class PlatformController {
     constructor({
         towerRadius = 5,
@@ -17,7 +19,7 @@ export class PlatformController {
     }
 
     // doda platformo od angleStart do angleEnd z visino,0.4debelino itd
-    add({ angleStart, angleEnd, height, thickness = 1, radius = null, deadly }) {
+    add({ angleStart, angleEnd, height, thickness = 1, radius = null, deadly, isFinal = false }) {
         this.platforms.push({
             angleStart,
             angleEnd,
@@ -25,6 +27,7 @@ export class PlatformController {
             thickness,
             radius: radius ?? this.towerRadius,
             deadly: deadly,
+            isFinal: isFinal
         });
     }
 
@@ -54,7 +57,7 @@ export class PlatformController {
         }
 
         for (const p of this.platforms) {
-
+            //console.log(p);
             if (Math.abs(p.radius - radius) > 0.15) continue;
 
             const insideAngle = this.angleInRange(
@@ -74,8 +77,12 @@ export class PlatformController {
                     if (top > landedY) {
                         landed = p;
                         landedY = top;
+                        if (p.isFinal) {
+                            console.log("final!!");
+                            this.showWinText();
+                        }
                     }
-                }
+                } 
             }
 
             // collision od spodaj
@@ -85,7 +92,7 @@ export class PlatformController {
                     if(p.deadly) player.alive = false;
                     player.verticalVelocity = 0;
                     player.verticalPosition = bottom - 0.02;
-                }
+                }           
             }
             
             // SIDE COLLISION = NE DELA (nepotreben)
@@ -109,5 +116,18 @@ export class PlatformController {
             player.verticalVelocity = 0;
             player.grounded = true;
         }
+    }
+
+    showWinText() {
+        console.log("showing win")
+        const hud3 = document.getElementById("hud3");
+        const overlay = document.getElementById("win-overlay");
+        const hud = document.getElementById("hud");
+        if (!hud3) return;
+
+        // Make it visible
+        hud3.style.display = "block";
+        overlay.style.display = "block";
+        hud.style.display = "none";
     }
 }

@@ -25,11 +25,13 @@ const resources = await loadResources({
     'floorMesh': new URL('../../../models/floor/floor.json', import.meta.url),
     'cubeMesh': new URL('../../../models/cube/cube.json', import.meta.url),
     'image': new URL('../../../models/floor/rock.png', import.meta.url),
-    'stonebrick': new URL('../../../models/cube/stonebrick.png', import.meta.url),
-    'playerSprite': new URL('../../totem.png', import.meta.url),
+    'stonebrick': new URL('../../../textures/Stone_wall_1.png', import.meta.url),
+    'wood': new URL('../../../textures/wood.png', import.meta.url),
+    'crabSprite': new URL('../../../textures/crab_sprite_front.png', import.meta.url),
+    'tEnemy': new URL('../../../textures/tutorial_enemy.png', import.meta.url),
     'towerBase': new URL('../../models/Base/Base.obj', import.meta.url),
     'platform3': new URL('../../models/Platforms/platform3mod.obj', import.meta.url),
-    'water': new URL('../../../lava2.png', import.meta.url),
+    'water': new URL('../../../textures/water.jpg', import.meta.url),
     'sky': new URL('../../../sky.png', import.meta.url),
     'spikes': new URL('../../../models/Platforms/spikes.obj', import.meta.url),
     'blood': new URL('../../../blood.jpg', import.meta.url),
@@ -123,7 +125,7 @@ playerSquare.addComponent(new Model({
             mesh: createSquareMesh(),
             material: new Material({
                 baseTexture: new Texture({
-                    image: resources.playerSprite,
+                    image: resources.crabSprite,
                     sampler: new Sampler({
                         minFilter: 'nearest',
                         magFilter: 'nearest',
@@ -152,9 +154,10 @@ function quatFromY(angle) {
     angle += 1.785
     return [0, Math.sin(angle / 2), 0, Math.cos(angle / 2)];
 }
-
-function addPlatform(angle, height, deadly = false, enemy = false) { //doda platformo na dolocenem kotu in visini
+//doda platformo na dolocenem kotu in visini
+function addPlatform(angle, height, deadly = false, enemy = false, isFinal = false) { 
     const platform = new Entity();
+
     if (!deadly) {
         platform.addComponent(new Transform({
             rotation: quatFromY(angle),
@@ -167,7 +170,7 @@ function addPlatform(angle, height, deadly = false, enemy = false) { //doda plat
                     mesh: resources.platform3,
                     material: new Material({
                         baseTexture: new Texture({
-                            image: resources.stonebrick,
+                            image: resources.wood,
                             sampler: new Sampler({
                                 minFilter: 'linear',
                                 magFilter: 'linear',
@@ -190,6 +193,10 @@ function addPlatform(angle, height, deadly = false, enemy = false) { //doda plat
             height: height,
             deadly: deadly,
         };
+        if (isFinal) {
+            p.isFinal = true;
+        }
+
         platformCtrl.add(p);
     } else {
         platform.addComponent(new Transform({
@@ -245,19 +252,20 @@ const platforms = [
     { angle: Math.PI, height: 4, enemy: true },
     { angle: 3*Math.PI/2, height: 6, enemy: true },
     { angle: Math.PI, height: 8 },
-    { angle: Math.PI, height: 10, enemy: true  },
+    { angle: Math.PI, height: 10,  },
     { angle: Math.PI - 0.05, height: 10, deadly: true },
-    { angle: Math.PI + 0.05, height: 10, deadly: true },
     { angle: Math.PI/2, height: 12 },
-    { angle: 0, height: 14 },
+    { angle: 0, height: 14, enemy: true },
     { angle: 3*Math.PI/2, height: 16 },
-    { angle: Math.PI, height: 18 },
-    { angle: Math.PI/4, height: 20 },
+    { angle: Math.PI, height: 18},
+    { angle: Math.PI, height: 18, deadly: true},
+    { angle: Math.PI, height: 20 },
+    { angle: Math.PI, height: 22, isFinal: true },
 ];
 
 // Add platforms
 for (const p of platforms) {
-    addPlatform(p.angle, p.height, p.deadly, p.enemy);
+    addPlatform(p.angle, p.height, p.deadly, p.enemy, p.isFinal);
 }
 
 
@@ -265,7 +273,7 @@ function addEnemyToPlatform(platformEntity) {
     const enemy = new Entity();
 
     enemy.addComponent(new Transform({
-        translation: [-6, 25, 21],
+        translation: [-4, 25, 21],
         scale: [1, 1, 1],
     }));
 

@@ -56,6 +56,11 @@ fn fragment(input: FragmentInput) -> FragmentOutput {
 
     let baseColor = textureSample(baseTexture, baseSampler, input.texcoords * material.uvScale) * material.baseFactor;
 
+        // Alpha test fix
+    if (baseColor.a < 0.1) {
+        discard;
+    }
+
     // Compute brightness
     let brightness = max(max(baseColor.r, baseColor.g), baseColor.b);
 
