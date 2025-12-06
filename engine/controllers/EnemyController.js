@@ -1,4 +1,7 @@
 import { Transform } from '../core/Transform.js';
+import { Parent } from '../core/Parent.js';
+import { PlayerController } from './PlayerController.js';
+import { vec3, mat4 } from 'glm';
 
 export class EnemyController {
     constructor(entity, {
@@ -6,6 +9,7 @@ export class EnemyController {
         towerRadius = 5,
         amplitude = 0.3,
         collisionRadius = 0.5,
+        player = null,
     } = {}) {
         this.entity = entity;
         this.towerRadius = towerRadius;
@@ -13,6 +17,7 @@ export class EnemyController {
         this.amplitude = amplitude;
         this.player = null;
         this.collisionRadius = collisionRadius;
+        this.player = player;
         
         this.alive = true;
         this.baseTranslation = [...entity.getComponentOfType(Transform).translation];
@@ -46,5 +51,41 @@ export class EnemyController {
         transform.rotation[1] = - Math.sin(half);
         transform.rotation[3] = Math.cos(half);
 
+
+        // colision
+        const parent = this.entity.getComponentOfType(Parent);
+        const parentMatrix = parent.entity.getComponentOfType(Transform).matrix;
+        
+        const localMatrix = this.entity.getComponentOfType(Transform).matrix;
+
+        const worldMatrix = mat4.multiply(mat4.create(), parentMatrix, localMatrix);
+
+        //position now in world position
+        const enemyPos = [
+            worldMatrix[12],
+            worldMatrix[13],
+            worldMatrix[14],
+        ];
+
+        const playerPos = this.player.getComponentOfType(Transform).translation;
+
+        // calculate how near player pos and wolrd pos and collision
+        const ENEMY_RADIUS = 0.1;   // TODO tweak mybe
+        const PLAYER_RADIUS = 0.4;  // tweak
+
+        const dx = playerPos[0] - enemyPos[0];
+        const dy = playerPos[1] - enemyPos[1];
+        const dz = playerPos[2] - enemyPos[2];
+
+        const distSq = dx*dx + dy*dy + dz*dz;
+        const radius = ENEMY_RADIUS + PLAYER_RADIUS;
+
+        if (distSq < radius * radius) {
+            // kill player
+            this.player.getComponentOfType(PlayerController).alive = false;
+        }
+
     }
+
+    
 }

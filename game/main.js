@@ -282,7 +282,12 @@ function addEnemyToPlatform(platformEntity) {
         ],
     }));
 
-    enemy.addComponent(new EnemyController(enemy, { speed: 1.2, player: playerSquare }));
+    enemy.addComponent(
+        new EnemyController(
+            enemy, { 
+                speed: 1.2, 
+                player: playerSquare 
+            }));
 
     enemy.addComponent(new Parent(platformEntity));
 
