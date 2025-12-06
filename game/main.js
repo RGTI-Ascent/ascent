@@ -258,7 +258,7 @@ function addEnemyToPlatform(platformEntity) {
     const enemy = new Entity();
 
     enemy.addComponent(new Transform({
-        translation: [-0, 25, 22],
+        translation: [-6, 25, 21],
         scale: [1, 1, 1],
     }));
 
@@ -282,7 +282,7 @@ function addEnemyToPlatform(platformEntity) {
         ],
     }));
 
-    enemy.addComponent(new EnemyController(enemy, { speed: 1.2 }));
+    enemy.addComponent(new EnemyController(enemy, { speed: 1.2, player: playerSquare }));
 
     enemy.addComponent(new Parent(platformEntity));
 
