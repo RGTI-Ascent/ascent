@@ -4,7 +4,7 @@ import { PlayerController } from './PlayerController.js';
 import { vec3, mat4 } from 'glm';
 
 export class EnemyController {
-    constructor(entity, {
+    constructor(entity, scene, {
         speed = 1,
         towerRadius = 5,
         amplitude = 0.3,
@@ -12,6 +12,7 @@ export class EnemyController {
         player = null,
     } = {}) {
         this.entity = entity;
+        this.scene = scene;
         this.towerRadius = towerRadius;
         this.speed = speed;
         this.amplitude = amplitude;
@@ -40,8 +41,10 @@ export class EnemyController {
         // world position
         const x = Math.cos(angle) * baseRadius;
         const z = Math.sin(angle) * baseRadius;
+        const y = this.baseTranslation[1] + Math.sin(t * this.speed * 10) * 0.2;
 
         transform.translation[0] = x;
+        transform.translation[1] = y;
         transform.translation[2] = z;
 
         const yaw = angle + Math.PI;
@@ -70,8 +73,8 @@ export class EnemyController {
         const playerPos = this.player.getComponentOfType(Transform).translation;
 
         // calculate how near player pos and wolrd pos and collision
-        const ENEMY_RADIUS = 0.1;   // TODO tweak mybe
-        const PLAYER_RADIUS = 0.4;  // tweak
+        const ENEMY_RADIUS = 0.4;   // TODO tweak mybe
+        const PLAYER_RADIUS = 0.5;  // tweak
 
         const dx = playerPos[0] - enemyPos[0];
         const dy = playerPos[1] - enemyPos[1];
@@ -80,9 +83,21 @@ export class EnemyController {
         const distSq = dx*dx + dy*dy + dz*dz;
         const radius = ENEMY_RADIUS + PLAYER_RADIUS;
 
+        const playerController = this.player.getComponentOfType(PlayerController);
         if (distSq < radius * radius) {
-            // kill player
-            this.player.getComponentOfType(PlayerController).alive = false;
+            const verticalDiff = playerPos[1] - enemyPos[1];
+        
+            if (verticalDiff > 0.3) {
+                // stomp
+                const index = this.scene.indexOf(this.entity);
+                if (index !== -1) this.scene.splice(index, 1);
+                playerController.verticalVelocity = 5; // bounce?
+                playerController.
+                return; 
+            } else {
+                // hit player
+                playerController.alive = false;
+            }
         }
 
     }

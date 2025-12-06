@@ -153,9 +153,9 @@ function quatFromY(angle) {
     return [0, Math.sin(angle / 2), 0, Math.cos(angle / 2)];
 }
 
-function addPlatform(angle, height, deadly) { //doda platformo na dolocenem kotu in visini
+function addPlatform(angle, height, deadly = false, enemy = false) { //doda platformo na dolocenem kotu in visini
     const platform = new Entity();
-    if(!deadly) {
+    if (!deadly) {
         platform.addComponent(new Transform({
             rotation: quatFromY(angle),
             translation: [0, -5.45+height, 0],
@@ -191,8 +191,7 @@ function addPlatform(angle, height, deadly) { //doda platformo na dolocenem kotu
             deadly: deadly,
         };
         platformCtrl.add(p);
-        addEnemyToPlatform(platform);
-    } else if (deadly) {
+    } else {
         platform.addComponent(new Transform({
             rotation: quatFromY(angle),
             translation: [0, -5.45+height, 0],
@@ -228,30 +227,38 @@ function addPlatform(angle, height, deadly) { //doda platformo na dolocenem kotu
             deadly: deadly,
         };
         platformCtrl.add(p);
+    } 
+    
+    if (enemy) {
+        addEnemyToPlatform(platform);
     }
 
     scene.push(platform);
 }
 
-let platforms = [
-    [Math.PI/4, 2],
-    [Math.PI/2, 4],
-    [Math.PI/2+0.05, 4, true],
-    [Math.PI, 4],
-    [Math.PI, 4],
-    [3*Math.PI/2, 6],
-    [Math.PI, 8],
-    [Math.PI, 10],
-    [Math.PI-0.05, 10, true],
-    [Math.PI+0.05, 10, true],
-    [Math.PI/2, 12],
-    [0, 14],
-    [3*Math.PI/2, 16],
-    [Math.PI, 18],
-    [Math.PI/4, 20],
+
+const platforms = [
+    { angle: Math.PI/4, height: 2, enemy: true },
+    { angle: Math.PI/2, height: 4 },
+    { angle: Math.PI/2 + 0.05, height: 4, deadly: true },
+    { angle: Math.PI, height: 4, enemy: true },
+    { angle: Math.PI, height: 4, enemy: true },
+    { angle: 3*Math.PI/2, height: 6, enemy: true },
+    { angle: Math.PI, height: 8 },
+    { angle: Math.PI, height: 10, enemy: true  },
+    { angle: Math.PI - 0.05, height: 10, deadly: true },
+    { angle: Math.PI + 0.05, height: 10, deadly: true },
+    { angle: Math.PI/2, height: 12 },
+    { angle: 0, height: 14 },
+    { angle: 3*Math.PI/2, height: 16 },
+    { angle: Math.PI, height: 18 },
+    { angle: Math.PI/4, height: 20 },
 ];
 
-for (const [angle, height, death] of platforms) addPlatform(angle, height, death ?? false);
+// Add platforms
+for (const p of platforms) {
+    addPlatform(p.angle, p.height, p.deadly, p.enemy);
+}
 
 
 function addEnemyToPlatform(platformEntity) {
@@ -284,7 +291,7 @@ function addEnemyToPlatform(platformEntity) {
 
     enemy.addComponent(
         new EnemyController(
-            enemy, { 
+            enemy, scene, { 
                 speed: 1.2, 
                 player: playerSquare 
             }));
