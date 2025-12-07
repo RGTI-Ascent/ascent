@@ -27,6 +27,7 @@ const resources = await loadResources({
     'image': new URL('../../../models/floor/rock.png', import.meta.url),
     'stonebrick': new URL('../../../textures/Stone_wall_1.png', import.meta.url),
     'wood': new URL('../../../textures/wood.png', import.meta.url),
+    'squid': new URL('../../../textures/squid.png', import.meta.url),
     'crabSprite': new URL('../../../textures/crab_sprite_front.png', import.meta.url),
     'tEnemy': new URL('../../../textures/tutorial_enemy.png', import.meta.url),
     'towerBase': new URL('../../models/Base/Base.obj', import.meta.url),
@@ -273,8 +274,8 @@ function addEnemyToPlatform(platformEntity) {
     const enemy = new Entity();
 
     enemy.addComponent(new Transform({
-        translation: [-4, 25, 21],
-        scale: [1, 1, 1],
+        translation: [-4, 24.5, 21.5],
+        scale: [1, 1.5, 1],
     }));
 
     enemy.addComponent(new Model({
@@ -283,7 +284,7 @@ function addEnemyToPlatform(platformEntity) {
                 mesh: resources.cubeMesh,
                 material: new Material({
                     baseTexture: new Texture({
-                        image: resources.zombie,
+                        image: resources.squid,
                         sampler: new Sampler({
                             minFilter: 'nearest',
                             magFilter: 'nearest',

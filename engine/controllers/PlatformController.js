@@ -119,7 +119,6 @@ export class PlatformController {
     }
 
     showWinText() {
-        console.log("showing win")
         const hud3 = document.getElementById("hud3");
         const overlay = document.getElementById("win-overlay");
         const hud = document.getElementById("hud");
