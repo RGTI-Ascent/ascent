@@ -257,10 +257,11 @@ const platforms = [
     { angle: Math.PI - 0.05, height: 10, deadly: true },
     { angle: Math.PI/2, height: 12 },
     { angle: 0, height: 14, enemy: true },
-    { angle: 3*Math.PI/2, height: 16 },
+    { angle: Math.PI/4 + 0.5, height: 14, enemy: true },
+    { angle: 3*Math.PI/2, height: 16, enemy: true },
     { angle: Math.PI, height: 18},
     { angle: Math.PI, height: 18, deadly: true},
-    { angle: Math.PI, height: 20 },
+    { angle: Math.PI, height: 20, enemy: true},
     { angle: Math.PI, height: 22, isFinal: true },
 ];
 
