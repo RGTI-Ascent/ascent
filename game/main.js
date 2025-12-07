@@ -179,7 +179,7 @@ function addPlatform(angle, height, deadly = false, enemy = false, isFinal = fal
                                 addressModeV: 'repeat',
                             }),
                         }),
-                        uvScale: [0.05, 0.05]
+                        uvScale: [0.8, 1]
                     }),
                 }),
             ],

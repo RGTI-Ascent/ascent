@@ -67,11 +67,14 @@ fn fragment(input: FragmentInput) -> FragmentOutput {
     // Soft bloom factor
     let bloomFactor = smoothstep(0.3, 1.3, brightness); // adjust 0.5–1.0 as needed
 
+
     // Bloom contribution
     let bloomColor = baseColor.rgb * bloomFactor * 0.5; // tweak 0.5 intensity
 
+
     // Combine with original
-    output.color = vec4(baseColor.rgb + bloomColor, baseColor.a);
+    let sunsetTint = vec3(0.05, 0.03, -0.05); // warms reds/oranges slightly
+    output.color = vec4(baseColor.rgb + bloomColor + sunsetTint, baseColor.a);
 
     return output;
 }
