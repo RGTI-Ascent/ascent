@@ -71,10 +71,8 @@ fn fragment(input: FragmentInput) -> FragmentOutput {
     // Bloom contribution
     let bloomColor = baseColor.rgb * bloomFactor * 0.5; // tweak 0.5 intensity
 
-
     // Combine with original
-    let sunsetTint = vec3(0.05, 0.03, -0.05); // warms reds/oranges slightly
-    output.color = vec4(baseColor.rgb + bloomColor + sunsetTint, baseColor.a);
+    output.color = vec4(baseColor.rgb + bloomColor, baseColor.a);
 
     return output;
 }
